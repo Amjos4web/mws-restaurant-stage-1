@@ -287,7 +287,7 @@ handleConnectionChange = (event) => {
 
 
   /* Get Data from indexedDB
-  return idb.open('review-personal-details', 1).then(function(db) {
+  idb.open('review-personal-details', 1).then(function(db) {
     var tx = db.transaction(['form_data'], 'readonly');
     var store = tx.objectStore('form_data');
     return store.getAll();
