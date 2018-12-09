@@ -42,7 +42,7 @@
 	  return self.clients.claim();
 	});
 
-	/*fetch cache 
+	//fetch cache 
 	self.addEventListener('fetch', event => {
 	  event.respondWith(caches.match(event.request)
 		.then(response => response || fetch(event.request)
@@ -77,26 +77,6 @@
           });
 	    })
 	)}
-})*/
+})
 
-self.addEventListener('fetch', event => {
-  const storageUrl = event.request.url.split(/[?#]/)[0];
-  if (event.request.method.toLowerCase() === 'get') {
-    event.respondWith(
-      caches.open(cacheName)
-      .then(cache => {
-        return cache.match(event.request)
-          .then(response => {
-            const fetchPromise = fetch(event.request)
-              .then(networkResponse => {
-                cache.put(event.request, networkResponse.clone());
-                return networkResponse;
-              })
-            return response || fetchPromise;
-          })
-      })
-      .catch(err => console.log(err))
-    );
-  }
-});
 

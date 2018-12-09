@@ -139,10 +139,26 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
   }
 }
 
+// fetch reviews from the server
+let REVIEWS_URL = "http://localhost:1337/reviews";
+
+fetchReviewsFromServerbyid = (id,callback) => {
+  let url=REVIEWS_URL+'?restaurant_id='+id;   //`?restaurant_id=${id}`;
+    fetch(url).then(response => {
+      let review= response.json();
+      review.then(function(reviewValue) {
+        callback(null,reviewValue);
+        console.log (reviewValue);
+      });      
+    }).catch(error =>{
+      callback(error, null);
+    });
+}
+
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews = self.reviewValue) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
@@ -163,19 +179,7 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   container.appendChild(ul);
 }
 
-// fetch reviews from the server
-let REVIEW_URL = "http://localhost:1337/reviews";
-fetch(REVIEW_URL)
-.then(response => {
-  return response.json()
-})
-.then(reviews => {
-  console.log(reviews)
- })
-.catch(error => {
-  // Oops!. Got an error from server.
-  console.log("Error has occured", error)
-})
+
 
 /**
  * Create review HTML and add it to the webpage.
@@ -217,26 +221,62 @@ form.addEventListener('submit', function(event) {
   // Set some Headers
   headers.set('Accept', 'application/json');
   // Get Data from Form
-  var formData = new FormData();
+  /*var formData = new FormData();
   formData.append(form[0].name, form[0].value);
   formData.append(form[1].name, form[1].value);
-  formData.append('restaurant_id', self.restaurant.id);
+  formData.append('restaurant_id', self.restaurant.id);*/
+
+  // Getting the data from the review form
+  const restaurantId = self.restaurant.id;
+  let reviewAuthor = document.getElementById('name').value;
+  let reviewRating = document.getElementById('rating').value;
+  let reviewComment = document.getElementById('comment').value;
 
 
-  fetch('http://localhost:1337/reviews/', {
+
+  const postedReview = {
+    "restaurant_id": parseInt(restaurantId),
+    "name": reviewAuthor,
+    "rating": parseInt(reviewRating),
+    "comments": reviewComment,
+  };
+
+
+  fetch('http://localhost:1337/reviews', {
     method: 'POST',
     headers,
-    body: formData
+    body: postedReview
   })
   .then(function (data) {
-    console.log('Review posted successfully', data);
-    console.log(FormData);
+    //console.log('Review posted successfully', data);
+    console.log(postedReview);
     //alert('Review Posted successfully');
   })
   .catch(function (error) {
     console.log('Request failed', error);
     //alert('Error has occured');
   });
+
+  // post data to database
+
+  failedPostListener = () => {
+    navigator.serviceWorker.addEventListener('message', event => {
+      var form = document.getElementById('form');
+
+      // Alert displays the message sent from our service worker
+      alert(event.data.msg);
+
+      // Assuming personal-details database have been created with
+      // form_data object store.
+      // We simply write to form_data.
+      idb.open('review-personal-details', 1).then(function(db) {
+        const tx = db.transaction('form_data', 'readwrite');
+        const store = tx.objectStore('form_data');
+        store.put({name: `${form[0].value}`});
+        console.log('Posted to database successfully');
+      })
+    });
+  }
 })
 
 addReviewHTML = (review) => {
@@ -264,27 +304,7 @@ handleConnectionChange = (event) => {
   }
 }*/
 
-  /* post data to database
-
-  failedPostListener = () => {
-    navigator.serviceWorker.addEventListener('message', event => {
-      var form = document.getElementById('form');
-
-      // Alert displays the message sent from our service worker
-      alert(event.data.msg);
-
-      // Assuming personal-details database have been created with
-      // form_data object store.
-      // We simply write to form_data.
-      idb.open('review-personal-details', 1).then(function(db) {
-        const tx = db.transaction('form_data', 'readwrite');
-        const store = tx.objectStore('form_data');
-        store.put({name: `${form[0].value}`});
-        console.log('Posted to database successfully');
-      })
-    });
-  }
-
+  
 
   /* Get Data from indexedDB
   idb.open('review-personal-details', 1).then(function(db) {
