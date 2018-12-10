@@ -216,21 +216,13 @@ createReviewHTML = (review) => {
 const form = document.querySelector('form');
 form.addEventListener('submit', function(event) {
   event.preventDefault();
-  // Setup the request
-  var headers = new Headers();
-  // Set some Headers
-  headers.set('Accept', 'application/json');
-  // Get Data from Form
-  /*var formData = new FormData();
-  formData.append(form[0].name, form[0].value);
-  formData.append(form[1].name, form[1].value);
-  formData.append('restaurant_id', self.restaurant.id);*/
 
   // Getting the data from the review form
   const restaurantId = self.restaurant.id;
   let reviewAuthor = document.getElementById('name').value;
   let reviewRating = document.getElementById('rating').value;
   let reviewComment = document.getElementById('comment').value;
+  let createdAt = new Date();
 
 
 
@@ -239,13 +231,14 @@ form.addEventListener('submit', function(event) {
     "name": reviewAuthor,
     "rating": parseInt(reviewRating),
     "comments": reviewComment,
+    "createdAt": createdAt,
   };
 
 
   fetch('http://localhost:1337/reviews', {
     method: 'POST',
-    headers,
-    body: postedReview
+    headers: {"Content-type": "application/json; charset=UTF-8"},
+    body: JSON.stringify(postedReview)
   })
   .then(function (data) {
     //console.log('Review posted successfully', data);
