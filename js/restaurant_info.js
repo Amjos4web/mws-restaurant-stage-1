@@ -235,19 +235,15 @@ form.addEventListener('submit', function(event) {
   };
 
 
-  fetch('http://localhost:1337/reviews', {
-    method: 'POST',
-    headers: {"Content-type": "application/json; charset=UTF-8"},
-    body: JSON.stringify(postedReview)
-  })
-  .then(function (data) {
-    //console.log('Review posted successfully', data);
-    console.log(postedReview);
-    //alert('Review Posted successfully');
-  })
-  .catch(function (error) {
-    console.log('Request failed', error);
-    //alert('Error has occured');
+  fetch('http://localhost:1337/reviews', { 
+    method: 'post', 
+    headers: { "Content-type": "application/json; charset=UTF-8" }, 
+    body: JSON.stringify(postedReview) 
+  }) 
+  .then(function (data) { 
+    console.log('Request succeeded with JSON response', data); 
+  }).catch(function (error) { 
+    console.log('Request failed', error); 
   });
 
   // post data to database
