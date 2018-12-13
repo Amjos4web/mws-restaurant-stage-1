@@ -8,11 +8,10 @@ class DBHelper {
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
-   
+   */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
-    // return `./data/restaurants.json`;
+    return `http://localhost:${port}/`;
   }
 
   /**
@@ -25,9 +24,24 @@ class DBHelper {
       return;
     }
 
-    const dbPromise = idb.open("foods", 1, upgradeDB => {
+    /*const dbPromise = idb.open("foods", 1, upgradeDB => {
       upgradeDB.createObjectStore("foods-store", {autoIncrement:true});
+    });*/
+
+    const dbPromise = idb.open('foods-menus', 1, (upgradeDB) => {
+      switch (upgradeDB.oldVersion) {
+        case 0:
+          upgradeDB.createObjectStore('foods-store', {
+            keyPath: 'id'
+          });
+        case 1:
+          const reviewsStore = upgradeDB.createObjectStore('reviews', {
+            keyPath: 'id'
+          });
+          reviewsStore.createIndex('restaurant', 'restaurant_id');
+      }
     });
+    
 
 
     if (!navigator.serviceWorker.controller) {
@@ -222,7 +236,20 @@ class DBHelper {
     return marker;
   } */
 
+  // fetch reviews from the server
 
-
+static fetchReviewsFromServerbyId (id)  {
+  fetch(`${DBHelper.DATABASE_URL}reviews?restaurant_id=${id}`)
+  .then(response => {
+    return response.json()
+  })
+  .then(reviews => {
+    console.log(reviews);
+  })
+  .catch(error => {
+    // Oops!. Got an error from server.
+    console.log("Got an error from server", error);
+  });
+}
 }
 

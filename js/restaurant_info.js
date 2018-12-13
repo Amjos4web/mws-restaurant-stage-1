@@ -10,7 +10,6 @@
   }
   
 let restaurant;
-let reviews;
 var newMap;
 
 /**
@@ -79,13 +78,37 @@ fetchRestaurantFromURL = (callback) => {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
       self.restaurant = restaurant;
       if (!restaurant) {
-        console.error(error);
+        console.log(error);
         return;
       }
       fillRestaurantHTML();
       callback(null, restaurant)
     });
   }
+}
+
+/**
+ * Create all reviews HTML and add them to the webpage.
+ */
+fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+  const container = document.getElementById('reviews-container');
+  const title = document.createElement('h2');
+  title.innerHTML = 'Reviews';
+  container.appendChild(title);
+
+  if (!reviews) {
+    const noReviews = document.createElement('p');
+    noReviews.innerHTML = 'No reviews yet!';
+    noReviews.setAttribute('aria-label', 'No reviews yet');
+    container.appendChild(noReviews);
+
+    return;
+  }
+  const ul = document.getElementById('reviews-list');
+  reviews.forEach(review => {
+    ul.appendChild(createReviewHTML(review));
+  });
+  container.appendChild(ul);
 }
 
 /**
@@ -118,6 +141,37 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 }
 
 /**
+ * Create restaurant HTML and add it to the webpage
+ */
+fillRestaurantHTML = (restaurant = self.restaurant) => {
+  const name = document.getElementById('restaurant-name');
+  name.innerHTML = restaurant.name;
+  name.tabIndex = '0';
+
+  const address = document.getElementById('restaurant-address');
+  address.innerHTML = restaurant.address;
+
+  const image = document.getElementById('restaurant-img');
+  image.className = 'restaurant-img'
+  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  // Add alternative text
+  image.alt = `photo of ${restaurant.name}`;
+  image.tabIndex = '0';
+
+  const cuisine = document.getElementById('restaurant-cuisine');
+  cuisine.innerHTML = restaurant.cuisine_type;
+
+  // fill operating hours
+  if (restaurant.operating_hours) {
+    fillRestaurantHoursHTML();
+  }
+
+  // fill reviews
+  DBHelper.fetchReviewsFromServerbyId(restaurant.id)
+    .then(reviews => fillReviewsHTML(reviews));
+}
+
+/**
  * Create restaurant operating hours HTML table and add it to the webpage.
  */
 fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => {
@@ -138,48 +192,6 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
     hours.appendChild(row);
   }
 }
-
-// fetch reviews from the server
-let REVIEWS_URL = "http://localhost:1337/reviews";
-
-fetchReviewsFromServerbyid = (id,callback) => {
-  let url=REVIEWS_URL+'?restaurant_id='+id;   //`?restaurant_id=${id}`;
-    fetch(url).then(response => {
-      let review= response.json();
-      review.then(function(reviewValue) {
-        callback(null,reviewValue);
-        console.log (reviewValue);
-      });      
-    }).catch(error =>{
-      callback(error, null);
-    });
-}
-
-/**
- * Create all reviews HTML and add them to the webpage.
- */
-fillReviewsHTML = (reviews = self.reviewValue) => {
-  const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
-
-  if (!reviews) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
-    noReviews.setAttribute('aria-label', 'No reviews yet');
-    container.appendChild(noReviews);
-
-    return;
-  }
-  const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
-  container.appendChild(ul);
-}
-
-
 
 /**
  * Create review HTML and add it to the webpage.
@@ -222,7 +234,6 @@ form.addEventListener('submit', function(event) {
   let reviewAuthor = document.getElementById('name').value;
   let reviewRating = document.getElementById('rating').value;
   let reviewComment = document.getElementById('comment').value;
-  let createdAt = new Date();
 
 
 
@@ -231,7 +242,7 @@ form.addEventListener('submit', function(event) {
     "name": reviewAuthor,
     "rating": parseInt(reviewRating),
     "comments": reviewComment,
-    "createdAt": createdAt,
+
   };
 
 
@@ -240,8 +251,9 @@ form.addEventListener('submit', function(event) {
     headers: { "Content-type": "application/json; charset=UTF-8" }, 
     body: JSON.stringify(postedReview) 
   }) 
-  .then(function (data) { 
-    console.log('Request succeeded with JSON response', data); 
+  .then(function () { 
+    //console.log('Request succeeded with JSON response');
+    alert('Review Posted Successfully');
   }).catch(function (error) { 
     console.log('Request failed', error); 
   });
@@ -261,7 +273,7 @@ form.addEventListener('submit', function(event) {
       idb.open('review-personal-details', 1).then(function(db) {
         const tx = db.transaction('form_data', 'readwrite');
         const store = tx.objectStore('form_data');
-        store.put({name: `${form[0].value}`});
+        store.put(postedReview);
         console.log('Posted to database successfully');
       })
     });

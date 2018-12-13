@@ -42,7 +42,7 @@
 	  return self.clients.claim();
 	});
 
-	/*fetch cache 
+	//fetch cache 
 	self.addEventListener('fetch', event => {
 	  event.respondWith(caches.match(event.request)
 		.then(response => response || fetch(event.request)
@@ -54,8 +54,7 @@
       //console.log('Service Worker error caching and fetching');
     }))
 	 );
-	});*/
-
+	});
 
 
 	// listen to post request
