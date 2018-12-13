@@ -280,17 +280,7 @@ form.addEventListener('submit', function(event) {
   }
 })
 
-addReviewHTML = (review) => {
-  if (document.getElementById('no-review')) {
-    document.getElementById('no-review').remove();
-  }
-  const container = document.getElementById('reviews-container');
-  const ul = document.getElementById('reviews-list');
 
-  //insert the new review on top
-  ul.insertBefore(createReviewHTML(review), ul.firstChild);
-  container.appendChild(ul);
-}
 
 /* listen to the network status by adding a listener to the window global object
 document.addEventListener('online', handleConnectionChange);
