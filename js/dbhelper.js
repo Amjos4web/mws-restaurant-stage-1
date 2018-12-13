@@ -239,6 +239,7 @@ class DBHelper {
   // fetch reviews from the server
 
 static fetchReviewsFromServerbyId (id)  {
+  let reviews;
   fetch(`${DBHelper.DATABASE_URL}reviews?restaurant_id=${id}`)
   .then(response => {
     return response.json()
