@@ -11,7 +11,7 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/`;
+    return `http://localhost:${port}/restaurants`;
   }
 
   /**
@@ -57,9 +57,8 @@ class DBHelper {
             callback(null, restaurants);
           });
     } else {
-        let DATABASE_URL = "http://localhost:1337/restaurants";
         let restaurants;
-        fetch(DATABASE_URL)
+        fetch(DBHelper.DATABASE_URL)
         .then(response => {
           return response.json()
         })
@@ -199,15 +198,25 @@ class DBHelper {
     return (`./restaurant.html?id=${restaurant.id}`);
   }
 
+  static fetchReviewsForRestaurant(id) {
+    return fetch(`http://localhost:1337/reviews?restaurant_id=${id}`)
+      .then(response => {
+        return response.json();
+      })
+      .then(reviews => {
+        console.log(reviews);
+        return reviews;
+      });
+  }
   /**
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
     let img = restaurant.photograph;
     if (restaurant.photograph) {
-      return (`img/${restaurant.photograph + '.jpg'}`);
+      return (`img/${`${restaurant.photograph}.jpg`}`);
     } else {
-      return (`img/${restaurant.id + '.jpg'}`);
+      return (`img/${`${restaurant.id}.jpg`}`);
     }
     
  }
@@ -235,19 +244,5 @@ class DBHelper {
     );
     return marker;
   } */
-
-  // fetch reviews from the server
-
-static fetchReviewsFromServerbyId (id)  {
-  fetch(`${DBHelper.DATABASE_URL}reviews?restaurant_id=${id}`)
-  .then(response => {
-    let reviews = response.json()
-    console.log(reviews);
-  })
-  .catch(error => {
-    // Oops!. Got an error from server.
-    console.log("Got an error from server", error);
-  });
-}
 }
 
