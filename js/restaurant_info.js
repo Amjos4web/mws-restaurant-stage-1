@@ -247,7 +247,7 @@ window.addEventListener('message', event => {
  DBHelper.fetchAllReviewsFromDB().then((reviews) => {
   // Post data to server
   reviews
-  .then(function() {
+  .then(() => {
   
     fetch('http://localhost:1337/reviews', { 
       method: 'post', 
@@ -257,7 +257,7 @@ window.addEventListener('message', event => {
    
     // If Post succeeds, delete data from IndexedDB
     response
-    .then(function(review){
+    .then((review) => {
         // Delete locally stored data after successful post to server
         dbPromise.then(dbObj => {
           const tx = db.transaction('reviews', 'readwrite');
@@ -269,35 +269,6 @@ window.addEventListener('message', event => {
  });
 });
 
-/* Get Data from indexedDB
-idb.open('review-personal-details', 1).then(function(db) {
-  var tx = db.transaction(['form_data'], 'readonly');
-  var store = tx.objectStore('form_data');
-  return store.getAll();
-})
-
-// Post data to server
-name
-.then(function(data) {
-  formData.append('name', data['name']);
-
-  var response = fetch('http://localhost:1337/reviews/', {
-    method: 'POST',
-    headers,
-    body: formData
-  });
-
-  // If Post succeeds, delete data from IndexedDB
-  response
-  .then(function(){
-      // Delete locally stored data after successful post to server
-      idb.open('restaurant', 1).then(function(db) {
-        const tx = db.transaction('form_data', 'readwrite');
-        const store = tx.objectStore('form_data');
-        store.clear();
-      })
-    })
-  })
 
 
 /**
