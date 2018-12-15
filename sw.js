@@ -57,25 +57,3 @@
 	});
 
 
-	// listen to post request
-	self.addEventListener('fetch', function(event) {
-	  var request = event.request;
-	  if (request.method === "POST") {
-	    event.respondWith(
-          // Try to POST form data to server
-          fetch(event.request)
-          .catch(function() {
-          // If it doesn't work, post a message to reassure user
-          self.clients.matchAll().then(function (clients){
-            clients.forEach(function(client){
-              client.postMessage({
-                msg: "Post unsuccessful! Server will be updated when connection is re-established.",
-                url: event.request.url
-              });
-            });
-          });
-	    })
-	)}
-})
-
-

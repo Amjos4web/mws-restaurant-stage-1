@@ -11,7 +11,6 @@ if ('serviceWorker' in navigator) {
 
 let restaurant;
 let newMap;
-let reviewFetched;
 
 /**
 * Initialize map as soon as the page is loaded.
@@ -96,20 +95,27 @@ const container = document.getElementById('reviews-container');
 const title = document.createElement('h2');
 title.innerHTML = 'Reviews';
 container.appendChild(title);
+DBHelper.fetchReviewsFromServer(self.restaurant.id)
+.then(reviews => {
+  console.log(reviews);
 
-if (!reviews) {
-  const noReviews = document.createElement('p');
-  noReviews.innerHTML = 'No reviews yet!';
-  noReviews.setAttribute('aria-label', 'No reviews yet');
-  container.appendChild(noReviews);
-
-  return;
-}
-const ul = document.getElementById('reviews-list');
-reviews.forEach(review => {
-  ul.appendChild(createReviewHTML(review));
+  if (!reviews) {
+    const noReviews = document.createElement('p');
+    noReviews.innerHTML = 'No reviews yet!';
+    noReviews.setAttribute('aria-label', 'No reviews yet');
+    container.appendChild(noReviews);
+  
+    return;
+  }
+  const ul = document.getElementById('reviews-list');
+  reviews.reverse().forEach(review => {
+    ul.appendChild(createReviewHTML(review));
+  });
+  container.appendChild(ul);
+}).catch(error =>{
+  console.log("Error has occured", error);
 });
-container.appendChild(ul);
+
 }
 
 /**
@@ -176,8 +182,8 @@ name.setAttribute('aria-label', `${review.name}`);
 li.appendChild(name);
 
 const date = document.createElement('p');
-date.innerHTML = review.date;
-date.setAttribute('aria-label', `${review.date}`);
+date.innerHTML = review.createdAt;
+date.setAttribute('aria-label', `${review.createdAt}`);
 li.appendChild(date);
 
 const rating = document.createElement('p');
@@ -193,104 +199,75 @@ li.appendChild(comments);
 return li;
 }
 
-
-
-
-
 // Add Review 
+
 const form = document.querySelector('form');
 form.addEventListener('submit', event => {
-event.preventDefault();
+  event.preventDefault();
 
-// Getting the data from the review form
-const restaurantId = self.restaurant.id;
-let reviewAuthor = document.getElementById('name').value;
-let reviewRating = document.getElementById('rating').value;
-let reviewComment = document.getElementById('comment').value;
+  // Getting the data from the review form
+  let formData = new FormData(form);
+    let postedReview = {
+        "restaurant_id": self.restaurant.id,
+        "name": formData.get('name'),
+        "rating": formData.get('rating'),
+        "comments": formData.get('comments'),
+        "createdAt": new Date()
+  };
 
+  console.log(postedReview);
 
-
-const postedReview = {
-  "restaurant_id": parseInt(restaurantId),
-  "name": reviewAuthor,
-  "rating": parseInt(reviewRating),
-  "comments": reviewComment,
-
-};
-console.log('postedReview');
-
-fetch('http://localhost:1337/reviews', { 
-  method: 'post', 
-  headers: { "Content-type": "application/json; charset=UTF-8" }, 
-  body: JSON.stringify(postedReview) 
-}) 
-.then(() => { 
-  fillReviewsHTML();
-}).catch(error => { 
-  console.log('Request failed', error); 
-});
-
-// post data to database
-
-/*failedPostListener = () => {
-  navigator.serviceWorker.addEventListener('message', event => {
-    var form = document.getElementById('form');
-
-    // Alert displays the message sent from our service worker
-    alert(event.data.msg);
-
-    // Assuming personal-details database have been created with
-    // form_data object store.
-    // We simply write to form_data.
-    idb.open('review-personal-details', 1).then(function(db) {
-      const tx = db.transaction('form_data', 'readwrite');
-      const store = tx.objectStore('form_data');
+  if (postedReview.reviewAuthor === undefined && postedReview.reviewComment === undefined){
+    return alert("Please add your review");
+  }
+  fetch('http://localhost:1337/reviews', { 
+    method: 'post', 
+    headers: { "Content-type": "application/json; charset=UTF-8" }, 
+    body: JSON.stringify(postedReview) 
+  }) 
+  .then(() => { 
+    fillReviewsHTML();
+  }).catch(
+    // post data to database.
+    dbPromise
+    .then(dbObj => {
+      const tx = db.transaction('reviews', 'readwrite');
+      const store = tx.objectStore('reviews');
       store.put(postedReview);
-      console.log('Posted to database successfully');
+      console.log('Review Posted to database successfully');
+    }).catch(error => {
+      callback(null, error);
     })
-  });
-}*/
-})
+  );
+});
 
 
 // Check if there's network and send the review
 window.addEventListener('message', event => {
-const id = getParameterByName('id');
- DBHelper.getAllReviews().then((reviews) => {
-  // Post Reviews
+ DBHelper.fetchAllReviewsFromDB().then((reviews) => {
+  // Post data to server
+  reviews
+  .then(function() {
   
-  }).then((review) => {
-    dbPromise
-    .then((dbObj) => {
-      if (!dbObj) return;
-      let tx = dbObj.transaction('reviews', 'readwrite');
-      let store = tx.objectStore('reviews');
-      if (review.sent) return;
-      store.delete(review.id);
-      return tx.complete
-    }).then(() => {
-      console.log('Item deleted')
+    fetch('http://localhost:1337/reviews', { 
+      method: 'post', 
+      headers: { "Content-type": "application/json; charset=UTF-8" }, 
+      body: JSON.stringify(reviews) 
+   }) 
+   
+    // If Post succeeds, delete data from IndexedDB
+    response
+    .then(function(review){
+        // Delete locally stored data after successful post to server
+        dbPromise.then(dbObj => {
+          const tx = db.transaction('reviews', 'readwrite');
+          const store = tx.objectStore('reviews');
+          store.delete(review.id);
+        });
+      });
     });
-  }).catch((err) => {
-    console.log(err);
-  });
+ });
 });
-
-
-/* listen to the network status by adding a listener to the window global object
-document.addEventListener('online', handleConnectionChange);
-
-handleConnectionChange = (event) => {
-if(event.type == "online"){
-  // Setup the request
-  console.log ('online');
-  var headers = new Headers();
-  // Set some Headers
-  headers.set('Accept', 'application/json');
-}
-}*/
-
-
 
 /* Get Data from indexedDB
 idb.open('review-personal-details', 1).then(function(db) {

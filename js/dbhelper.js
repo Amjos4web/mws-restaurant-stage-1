@@ -198,16 +198,6 @@ class DBHelper {
     return (`./restaurant.html?id=${restaurant.id}`);
   }
 
-  static fetchReviewsForRestaurant(id) {
-    return fetch(`http://localhost:1337/reviews?restaurant_id=${id}`)
-      .then(response => {
-        return response.json();
-      })
-      .then(reviews => {
-        console.log(reviews);
-        return reviews;
-      });
-  }
   /**
    * Restaurant image URL.
    */
@@ -244,5 +234,34 @@ class DBHelper {
     );
     return marker;
   } */
+
+  // fetch reviews from server
+  static fetchReviewsFromServer(id) {
+    let reviews;
+    return fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
+      .then(response => {
+        return response.json();
+      })
+      .then(reviews => {
+        return reviews;
+      });
+  }
+
+  static fetchAllReviewsFromDB() {
+    return new Promise((resolve, reject) => {
+      dbPromise
+      .then((dbObj) => {
+          if (!dbObj) return;
+  
+          let tx = db.transaction('reviews')
+            .objectStore('reviews')
+            tx.getAll().then(reviews => {
+            resolve(reviews);
+            console.log(reviews);
+          });
+        });
+      }
+    );
+}
 }
 
