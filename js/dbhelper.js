@@ -8,10 +8,11 @@ class DBHelper {
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
-   */
+   
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
+    // return `./data/restaurants.json`;
   }
 
   /**
@@ -41,8 +42,6 @@ class DBHelper {
           reviewsStore.createIndex('restaurant', 'restaurant_id');
       }
     });
-    
-
 
     if (!navigator.serviceWorker.controller) {
       dbPromise
@@ -57,8 +56,9 @@ class DBHelper {
             callback(null, restaurants);
           });
     } else {
+        let DATABASE_URL = "http://localhost:1337/restaurants";
         let restaurants;
-        fetch(DBHelper.DATABASE_URL)
+        fetch(DATABASE_URL)
         .then(response => {
           return response.json()
         })
@@ -204,9 +204,9 @@ class DBHelper {
   static imageUrlForRestaurant(restaurant) {
     let img = restaurant.photograph;
     if (restaurant.photograph) {
-      return (`img/${`${restaurant.photograph}.jpg`}`);
+      return (`img/${restaurant.photograph + '.jpg'}`);
     } else {
-      return (`img/${`${restaurant.id}.jpg`}`);
+      return (`img/${restaurant.id + '.jpg'}`);
     }
     
  }
@@ -248,20 +248,17 @@ class DBHelper {
   }
 
   static fetchAllReviewsFromDB() {
-    return new Promise((resolve, reject) => {
-      dbPromise
-      .then((dbObj) => {
-          if (!dbObj) return;
-  
-          let tx = db.transaction('reviews')
-            .objectStore('reviews')
-            tx.getAll().then(reviews => {
-            resolve(reviews);
-            console.log(reviews);
-          });
+    dbPromise
+    .then((dbObj) => {
+      if (!dbObj) return;
+
+      let tx = dbObj.transaction('reviews')
+        .objectStore('reviews')
+        tx.getAll().then(reviews => {
+          resolve(reviews);
+          console.log(reviews);
         });
-      }
-    );
-}
+    });
+  }
 }
 
