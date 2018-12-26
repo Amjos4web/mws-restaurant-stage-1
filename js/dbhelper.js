@@ -245,19 +245,5 @@ class DBHelper {
         return reviews;
       });
   }
-
-  static fetchAllReviewsFromDB() {
-    DBHelper.openDB()
-    .then((dbObj) => {
-      if (!dbObj) return;
-
-      let tx = dbObj.transaction('reviews')
-        .objectStore('reviews')
-        tx.getAll().then(reviews => {
-          resolve(reviews);
-          console.log(reviews);
-        });
-    });
-  }
 }
 
