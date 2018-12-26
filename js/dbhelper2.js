@@ -13,24 +13,8 @@ class DBHelper {
     const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
     // return `./data/restaurants.json`;
-  }\*/
-
-  static openDB(){
-    return idb.open('foods-menus', 1, (upgradeDB) => {
-      switch (upgradeDB.oldVersion) {
-        case 0:
-          upgradeDB.createObjectStore('foods-store', {
-            keyPath: 'id'
-          });
-        case 1:
-          const reviewsStore = upgradeDB.createObjectStore('reviews', {
-            keyPath: 'createdAt'
-          });
-          reviewsStore.createIndex('restaurant', 'restaurant_id');
-      }
-    });
   }
-  
+
   /**
    * Fetch all restaurants.
   */
@@ -41,9 +25,26 @@ class DBHelper {
       return;
     }
 
+    /*const dbPromise = idb.open("foods", 1, upgradeDB => {
+      upgradeDB.createObjectStore("foods-store", {autoIncrement:true});
+    });*/
+
+    const dbPromise = idb.open('foods-menus', 1, (upgradeDB) => {
+      switch (upgradeDB.oldVersion) {
+        case 0:
+          upgradeDB.createObjectStore('foods-store', {
+            keyPath: 'id'
+          });
+        case 1:
+          const reviewsStore = upgradeDB.createObjectStore('reviews', {
+            keyPath: 'id'
+          });
+          reviewsStore.createIndex('restaurant', 'restaurant_id');
+      }
+    });
 
     if (!navigator.serviceWorker.controller) {
-      DBHelper.openDB()
+      dbPromise
           .then(dbObj => {
             return dbObj
             .transaction("foods-store")
@@ -64,7 +65,7 @@ class DBHelper {
         .then(restaurants => {
           //const objKey = Object.keys(restaurants)[0];
           //console.log(restaurants);
-          DBHelper.openDB().then(dbObj => {
+            dbPromise.then(dbObj => {
               const tx = dbObj.transaction("foods-store", "readwrite")
               .objectStore("foods-store");
               restaurants.forEach(restaurant => {
@@ -247,7 +248,7 @@ class DBHelper {
   }
 
   static fetchAllReviewsFromDB() {
-    DBHelper.openDB()
+    dbPromise
     .then((dbObj) => {
       if (!dbObj) return;
 

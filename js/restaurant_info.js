@@ -123,7 +123,7 @@ fillReviewsHTML = () => {
   container.appendChild(title);
   DBHelper.fetchReviewsFromServer(self.restaurant.id)
   .then(reviews => {
-    console.log(reviews);
+    //console.log(reviews);
   
     if (!reviews) {
       const noReviews = document.createElement('p');
@@ -195,96 +195,83 @@ createReviewHTML = (review) => {
 }
 
 // add event listener to windows
+//window.addEventListener('offline', function(){
 const form = document.querySelector('form');
-form.addEventListener('submit', event => {
+form.addEventListener('submit', function() {
   event.preventDefault();
-
   // Getting the data from the review form
-  /*DBHelper.getLastReviewId()
-  .then(lastReviewID =>{
-    console.log(lastReviewID);
-  })*/
+
   let formData = new FormData(form);
-    let postedReview = {
-        "restaurant_id": self.restaurant.id,
-        "name": formData.get('name'),
-        "rating": formData.get('stars'),
-        "comments": formData.get('comments'),
-        "createdAt": new Date()
+  const postedReview = {
+      "restaurant_id": self.restaurant.id,
+      "name": formData.get('name'),
+      "rating": formData.get('stars'),
+      "comments": formData.get('comments'),
+      "createdAt": new Date()
   };
-
-  
-
-  console.log(postedReview);
-
   if (postedReview.reviewAuthor === "" && postedReview.reviewComment === ""){
     return alert("Please add your review");
   }
-  fetch('http://localhost:1337/reviews', { 
-    method: 'post', 
-    headers: { "Content-type": "application/json; charset=UTF-8" }, 
-    body: JSON.stringify(postedReview) 
-  }) 
-  .then(() => {
-    console.log("Data posted successfully", postedReview);
-    //alert("Review added successfully") 
-    fillReviewsHTML();
-  }).catch(
-    // post data to database.
-    dbPromise
-    .then(dbObj => {
-      const tx = db.transaction('reviews', 'readwrite');
-      const store = tx.objectStore('reviews');
-      store.put(postedReview);
-      console.log('Review Posted to database successfully');
-    }).catch(error => {
-      callback(null, error);
+
+  // check if user is online
+  if(navigator.onLine){
+    fetch('http://localhost:1337/reviews', { 
+      method: 'POST', 
+      headers: { "Content-type": "application/json; charset=UTF-8" }, 
+      body: JSON.stringify(postedReview) 
+    }) 
+    .then(() => {
+      //console.log("Data posted successfully", postedReview);
+      alert("Review added successfully") 
+      //fillReviewsHTML();
     })
-  );
-});
-
-/* listen to the network status by adding a listener to the window global object
-window.addEventListener('online', handleConnectionChange);
-
-handleConnectionChange = (event) => {
-  if(event.type == "online"){
-   // Setup the request
-   var headers = new Headers();
-  // Set some Headers
-  headers.set('Accept', 'application/json');
-
-  // Get Data from indexedDB
-  var name = return idb.open('review-personal-details', 1).then(function(db) {
-    var tx = db.transaction(['form_data'], 'readonly');
-    var store = tx.objectStore('form_data');
-    return store.getAll();
-  })
-
-  // Post data to server
-  name
-  .then(function(data) {
-    formData.append('name', data['name']);
-
-    var response = fetch('http://localhost:1337/reviews/', {
-      method: 'POST',
-      headers,
-      body: formData
-    });
-
-    // If Post succeeds, delete data from IndexedDB
-    response
-    .then(function(){
-        // Delete locally stored data after successful post to server
-        idb.open('restaurant', 1).then(function(db) {
-          const tx = db.transaction('form_data', 'readwrite');
-          const store = tx.objectStore('form_data');
-          store.clear();
-        })
+    } else {
+      // post review to the database instead
+      DBHelper.openDB()
+      .then(dbObj => {
+        const tx = dbObj.transaction('reviews', 'readwrite');
+        const store = tx.objectStore('reviews');
+        store.put(postedReview);
+        //console.log('Review Posted to database successfully');
+      }).catch(error => {
+        callback(null, error);
       })
+    
+      alert("It seems you are offline. Your review will be automatically posted to the server when online");
+    }
+  });
 
+  // listen to the network status by adding a listener to the window global object
+  window.addEventListener('online', function(){
+    // get reviews from the database
+    DBHelper.openDB()
+    .then(dbObj => {
+      return dbObj
+      .transaction("reviews")
+      .objectStore("reviews")
+      .getAll();
+    }).then(allReviews => {
+      allReviews.map(reviewToPost => {
+        //console.log(reviewToPost);
+        // post to server
+        fetch('http://localhost:1337/reviews', { 
+          method: 'POST', 
+          headers: { "Content-type": "application/json; charset=UTF-8" }, 
+          body: JSON.stringify(reviewToPost)
+        }).then(() => {
+          // Delete locally stored data after successful post to server
+          DBHelper.openDB()
+          .then(dbObj => {
+            return dbObj
+            .transaction("reviews", "readwrite")
+            .objectStore("reviews")
+            .clear();
+          });
+          location.reload(true);
+        })
+      });
+    });
   })
-}
-}
 
 /**
  * Add restaurant name to the breadcrumb navigation menu
