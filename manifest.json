@@ -3,13 +3,13 @@
   "name": "Restarants Review Web App",
   "icons": [
     {
-      "src": "./img/icon.png",
+      "src": "./img/android-192x192.png",
       "type": "image/png",
-      "sizes": "190x190"
+      "sizes": "192x192"
     },
     {
-      "src": "./img/icon_512x512.jpg",
-      "type": "image/jpg",
+      "src": "./img/android-512x512.png",
+      "type": "image/png",
       "sizes": "512x512"
     }
   ],

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html>
 <head>
   <html lang="en">
   <!-- Normalize.css for better cross-browser consistency -->
@@ -8,11 +7,14 @@
   <meta name="theme-color" content="#3367D6"/>
   <meta name="viewport" content="width=device-width" initial-scale="1">
   <!-- Main CSS file -->
- <link rel="stylesheet" href="dest/css/style.min.css" type="text/css" >
- <link rel="stylesheet" href="css/styles.css" type="text/css" >
+ <!--<link rel="stylesheet" href="dest/css/style.min.css" type="text/css" >-->
+ <link rel="manifest" href="./manifest.json">
+
+ <link rel="stylesheet" href="dest/css/styles.min.css" type="text/css">
+ <link rel="stylesheet" href="dest/css/responsive.min.css" type="text/css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin="" defer/>
   <link href='https://api.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet'/>
-  <link rel="manifest" href="./manifest.json">
+
 
 </head>
 
@@ -24,7 +26,7 @@
       <h1><a href="./">Restaurant Reviews</a></h1>
     </nav>
     <!-- Beginning breadcrumb -->
-    <ul id="breadcrumb" aria-label="Breadcrumb">
+    <ul id="breadcrumb" aria-label="Breadcrumb" role="navigation">
       <li><a href="./">Home</a></li>
     </ul>
     <!-- End breadcrumb -->
@@ -41,7 +43,7 @@
     <!-- End map -->
     <!-- Beginning restaurant -->
     <section id="restaurant-container">
-      <h1 id="restaurant-name"></h1>
+      <h2 id="restaurant-name"></h2>
       <img id="restaurant-img">
       <p id="restaurant-cuisine"></p>
       <p id="restaurant-address"></p>
@@ -49,10 +51,10 @@
     </section>
     <!-- end restaurant -->
     <!-- Beginning reviews -->
-    <section id="reviews-container">
+    <section id="reviews-container" tabindex="0">
       <ul id="reviews-list"></ul>
       <section class="review-form">
-        <h3>Enter Your Review</h3>
+        <h3 aria-label="Enter your review">Enter Your Review</h3>
         <form id="review-form">
           <label for="name">
             Name
@@ -63,29 +65,29 @@
           </label><br>
           <div class="rating">
             <label>
-              <input type="radio" id="rating" name="stars" value="1" />
+              <input type="radio" id="rating" name="stars" aria-label="1 star rating" value="1" />
               <span class="icon">★</span>
             </label>
             <label>
-              <input type="radio" id="rating" name="stars" value="2" />
+              <input type="radio" id="rating" name="stars" aria-label="2 stars rating" value="2" />
               <span class="icon">★</span>
               <span class="icon">★</span>
             </label>
             <label>
-              <input type="radio" id="rating" name="stars" value="3" />
+              <input type="radio" id="rating" name="stars" aria-label="3 stars rating" value="3" />
               <span class="icon">★</span>
               <span class="icon">★</span>
               <span class="icon">★</span>   
             </label>
             <label>
-              <input type="radio" id="rating" name="stars" value="4" />
+              <input type="radio" id="rating" name="stars" aria-label="4 stars rating" value="4" />
               <span class="icon">★</span>
               <span class="icon">★</span>
               <span class="icon">★</span>
               <span class="icon">★</span>
             </label>
             <label>
-              <input type="radio" id="rating" name="stars" value="5" />
+              <input type="radio" id="rating" name="stars" aria-label="5 stars rating" value="5" />
               <span class="icon">★</span>
               <span class="icon">★</span>
               <span class="icon">★</span>
@@ -98,7 +100,7 @@
           </label>
           <p><textarea type="textarea" name="comments" id="comments" rows="10" cols="
             50" class="comments" aria-label="your comments" required="required"></textarea></p>
-          <button id="addReview" name="submit">Submit</button>
+          <button id="addReview" aria-label="submit button" name="submit">Submit</button>
         </form> 
       </section>
     </section>

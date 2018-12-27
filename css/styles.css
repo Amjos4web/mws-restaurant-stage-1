@@ -47,7 +47,7 @@ h6 {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0 0 20px;
 }
-/article, 
+article, 
 aside, 
 canvas, 
 details, 
@@ -72,9 +72,11 @@ section {
   color: #FFFFFF;
   font-size: 8pt;
   letter-spacing: 1px;
-  padding: 25px;
+  padding: 30px 0 30px 0;
   text-align: center;
   text-transform: uppercase;
+  overflow: hidden;
+  width: 100%;
 }
 /* ====================== Navigation ====================== */
 nav {
@@ -256,13 +258,7 @@ nav h1 a {
   width: 100%;
 }
 
-.inside #footer {
-  /*
-  bottom: 0;
-  position: absolute;
 
-  width: 100%;*/
-}
 
 #restaurant-name {
   color: #f18200;
@@ -303,6 +299,20 @@ nav h1 a {
   border-top: 1px solid #fff;
   padding: 0.5em;
   width: calc(100% - 1em);
+}
+
+/* Favourite */
+span.favorite,
+span.unfavorite {
+    float: right;
+    color:red; 
+    font-size: 35px;
+    cursor: pointer;
+    margin-top: -20px; 
+}
+
+span.unfavorite {
+    color:black;
 }
 
 /*

@@ -96,8 +96,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   name.setAttribute('aria-label', ''+ restaurant.name);
 
   const address = document.getElementById('restaurant-address');
-  address.innerHTML = restaurant.address;
-  address.setAttribute('aria-label', ''+ restaurant.address);
+  address.innerHTML = restaurant.address + ' <span class="unfavorite" id="favorite">&hearts;</span>';
+  address.setAttribute('aria-label', ''+ restaurant.address +'' +'Mark as favorite');
 
 
   const image = document.getElementById('restaurant-img');
@@ -114,11 +114,49 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   }
   // fill reviews
   fillReviewsHTML();
+
+  let favIcon = document.getElementById('favorite');
+  favIcon.addEventListener('click', function(){
+    let className = this.className;
+    const restaurantId = getParameterByName('id');
+    
+
+    const favoriteURL = 'http://localhost:1337/restaurants/${restaurantId}/is_favorite=true';
+    const unFavoriteURL = 'http://localhost:1337/restaurants/${restaurantId}/is_favorite=false';
+
+    favouriteARestuarant = () =>  {
+      return fetch(`http://localhost:1337/restaurants/${restaurantId}/is_favorite=true`, {
+        method: 'PUT',
+      }).then(response => response.json())
+    }
+
+    if ('favorite' === className) {
+      this.className = 'unfavorite';
+       // Unfavourite a restuarant
+      favouriteARestuarant(unFavoriteURL).then((response) => {
+        console.log(response);
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      this.className = 'favorite';
+      // Favorite a restuarant
+       favouriteARestuarant(favoriteURL).then((response) => {
+        console.log(response);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  });
+
+  
 }
+
+
 
 fillReviewsHTML = () => {
   const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
+  const title = document.createElement('h4');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
   DBHelper.fetchReviewsFromServer(self.restaurant.id)
@@ -195,7 +233,6 @@ createReviewHTML = (review) => {
 }
 
 // add event listener to windows
-//window.addEventListener('offline', function(){
 const form = document.querySelector('form');
 form.addEventListener('submit', function() {
   event.preventDefault();
@@ -223,7 +260,6 @@ form.addEventListener('submit', function() {
     .then(() => {
       //console.log("Data posted successfully", postedReview);
       alert("Review added successfully") 
-      //fillReviewsHTML();
     })
     } else {
       // post review to the database instead
@@ -252,8 +288,6 @@ form.addEventListener('submit', function() {
       .getAll();
     }).then(allReviews => {
       allReviews.map(reviewToPost => {
-        //console.log(reviewToPost);
-        // post to server
         fetch('http://localhost:1337/reviews', { 
           method: 'POST', 
           headers: { "Content-type": "application/json; charset=UTF-8" }, 

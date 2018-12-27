@@ -245,5 +245,6 @@ class DBHelper {
         return reviews;
       });
   }
+
 }
 

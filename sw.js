@@ -12,7 +12,8 @@
 		'./js/dbhelper.js',
 		'./js/restaurant_info.js',
 		'/css/styles.css',
-		'/dest/css/style.min.css',
+		'/dest/css/styles.min.css',
+		'/dest/css/responsive.min.css',
 		'/css/responsive.css',
 		'/img/',
 	];
