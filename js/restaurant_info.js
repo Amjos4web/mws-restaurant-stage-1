@@ -121,31 +121,32 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     const restaurantId = getParameterByName('id');
     
 
-    const favoriteURL = 'http://localhost:1337/restaurants/${restaurantId}/is_favorite=true';
-    const unFavoriteURL = 'http://localhost:1337/restaurants/${restaurantId}/is_favorite=false';
+    const favoriteURL = 'http://localhost:1337/restaurants/${restaurantId}/?is_favorite=true';
+    const unFavoriteURL = 'http://localhost:1337/restaurants/${restaurantId}/?is_favorite=false';
 
-    favouriteARestuarant = () =>  {
-      return fetch(`http://localhost:1337/restaurants/${restaurantId}/is_favorite=true`, {
-        method: 'PUT',
-      }).then(response => response.json())
-    }
 
     if ('favorite' === className) {
       this.className = 'unfavorite';
        // Unfavourite a restuarant
-      favouriteARestuarant(unFavoriteURL).then((response) => {
-        console.log(response);
-      }).catch((error) => {
+        return fetch(`http://localhost:1337/restaurants/${restaurantId}/?is_favorite=false`, {
+          method: 'PUT',
+        }).then(response => {
+          response.json()
+        })
+        .catch((error) => {
         console.log(error);
       });
     } else {
       this.className = 'favorite';
       // Favorite a restuarant
-       favouriteARestuarant(favoriteURL).then((response) => {
-        console.log(response);
-      }).catch((error) => {
-        console.log(error);
-      });
+      return fetch(`http://localhost:1337/restaurants/${restaurantId}/?is_favorite=true`, {
+        method: 'PUT',
+      }).then(response => {
+        response.json()
+      })
+      .catch((error) => {
+      console.log(error);
+    });
     }
   });
 
